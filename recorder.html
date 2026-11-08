@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Meet audio recorder</title><link rel="stylesheet" href="popup.css"><link rel="stylesheet" href="recorder.css"></head>
+<body>
+  <header><span class="eyebrow">CAPTIONS OPTIONAL</span><h1>Meet audio transcript<span>●</span></h1><p>Tab audio → local Whisper → your transcript</p></header>
+  <main>
+    <h2 id="meeting">Connecting to meeting…</h2>
+    <p>Keep this recorder tab open. You can return to Meet while it works.</p>
+    <p class="hint">Start the local service first (see README), then paste its access token below. Audio goes only to the service at 127.0.0.1:8765 on this computer. The token is kept in memory for this tab only.</p>
+    <label for="token">Local service access token</label>
+    <input id="token" type="password" autocomplete="off" spellcheck="false">
+    <label class="consent"><input id="microphone" type="checkbox"> Include my microphone. Without this, only sound played by the Meet tab is captured.</label>
+    <label class="consent"><input id="consent" type="checkbox"> I’ve informed participants and have their consent to transcribe.</label>
+    <p class="hint">Microphone input is mixed with meeting audio. This mode cannot identify speakers. Meet’s mute button does not mute this separate microphone capture; stop transcription to stop capturing it.</p>
+    <div class="controls"><button id="start" disabled>Start audio transcription</button><button id="stop" disabled>Stop and finish</button></div>
+    <p id="status" role="status">Not recording</p>
+    <p id="error" role="alert"></p>
+    <div class="controls"><button id="txt" disabled>Export TXT</button><button id="json" disabled>Export JSON</button></div>
+    <p class="hint">Text is saved on this device. Raw audio is processed in short in-memory windows and is not saved. The first text usually appears after a 10-second window plus processing time. Closing this tab loses unprocessed audio.</p>
+    <h2>Transcript</h2><div id="transcript" aria-live="polite"></div>
+  </main>
+  <script src="audio-tools.js"></script><script src="recorder.js"></script>
+</body></html>

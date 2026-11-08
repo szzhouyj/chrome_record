@@ -1,0 +1,7 @@
+body { width: auto; max-width: 760px; margin: 30px auto; padding: 0 16px; }
+header { border-radius: 14px; }
+main { padding: 24px 0; }
+h2 { margin-top: 12px; }
+#token { display: block; width: 100%; box-sizing: border-box; padding: 10px; margin: 8px 0; border: 1px solid #c9d5c9; border-radius: 7px; font: inherit; }
+#status { background: #e6eddf; padding: 12px; border-radius: 7px; }
+#transcript p { border-top: 1px solid #d9e0d6; padding-top: 12px; white-space: pre-wrap; }

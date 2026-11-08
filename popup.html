@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Meet Transcript</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><span class="eyebrow">YOUR MEETING NOTEBOOK</span><h1>Meet Transcript<span>●</span></h1><p>Stay in the conversation.<br>Keep the words that matter.</p></header>
+  <main>
+    <div id="status" role="status">Connecting to Meet…</div>
+    <label for="mode">Transcription source</label>
+    <select id="mode"><option value="audio">Tab audio · captions off</option><option value="captions">Meet captions · no model needed</option></select>
+    <p class="hint" id="mode-hint">Uses local Whisper. Opens a recorder tab with setup and consent controls.</p>
+    <label class="consent" id="caption-consent" hidden><input id="consent" type="checkbox"> I’ve informed participants and have their consent to transcribe.</label>
+    <div class="controls"><button id="start" disabled>Start transcript</button><button id="stop" disabled>Stop</button></div>
+    <p><button id="live" disabled>Export current tab transcript</button></p>
+    <h2>Saved on this device</h2>
+    <p class="hint">Audio mode sends short audio windows to a local Whisper service on your computer. Captions mode saves caption text only. Inform participants; the extension does not notify them.</p>
+    <div id="sessions"></div>
+    <p id="error" role="alert"></p>
+  </main>
+  <script src="audio-tools.js"></script><script src="popup.js"></script>
+</body></html>
