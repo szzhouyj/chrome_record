@@ -27,8 +27,16 @@ with sync_playwright() as p:
     page.evaluate(MOCK)
     for script in ['captions.js', 'content.js']:
         page.add_script_tag(path=str(ROOT / script))
+    page.evaluate("""() => {
+        document.body.insertAdjacentHTML('beforeend', '<button aria-label="Leave call">Leave</button><button id="cc" aria-label="Turn on captions">CC</button>');
+        document.querySelector('#cc').onclick = event => {
+            event.currentTarget.setAttribute('aria-label', 'Turn off captions');
+            window.captionClicks = (window.captionClicks || 0) + 1;
+        };
+    }""")
     assert 'consent' in page.evaluate("send({type:'START'})")['error']
     assert page.evaluate("send({type:'START',consent:true})")['result']['recording']
+    page.wait_for_function("window.captionClicks === 1")
     page.evaluate("document.querySelector('#captions').innerHTML = '<div class=\"nMcdL\"><div class=\"zs7s8d\">Alex</div><div class=\"ygicle\">Hello</div></div>'")
     page.wait_for_function("document.querySelector('#meet-transcript-indicator').textContent.includes('1 captions')")
     page.evaluate("document.querySelector('.ygicle').textContent = 'Hello everyone'")
@@ -47,6 +55,7 @@ with sync_playwright() as p:
     assert page.evaluate("send({type:'START',consent:true})")['result']['recording']
     page.wait_for_timeout(850)
     assert len(page.evaluate('Object.keys(window.data)')) == 2
+    assert page.evaluate('window.captionClicks') == 1
     page.evaluate('window.failWrites = true')
     page.evaluate("document.querySelector('.ygicle').textContent = 'Storage failure'")
     page.wait_for_function("document.querySelector('#meet-transcript-indicator').textContent.includes('Could not save')")
@@ -82,7 +91,21 @@ with sync_playwright() as p:
         return window.leftTeams === true;
     }""")
     teams.evaluate("""document.querySelector("#meeting").innerHTML = '<button data-tid="hangup-button">Leave</button>'""")
+    teams.evaluate("""() => {
+        const meeting = document.querySelector('#meeting');
+        meeting.insertAdjacentHTML('beforeend', '<button id="more-actions-button">More actions</button>');
+        meeting.querySelector('#more-actions-button').onclick = () => {
+            meeting.insertAdjacentHTML('beforeend', '<button id="language-menu">Language and speech</button>');
+            meeting.querySelector('#language-menu').onclick = () => {
+                meeting.insertAdjacentHTML('beforeend', '<button id="teams-cc">Show live captions</button>');
+                meeting.querySelector('#teams-cc').onclick = event => {
+                    event.currentTarget.textContent = 'Hide live captions';
+                };
+            };
+        };
+    }""")
     teams.get_by_role('button', name='Start saving captions').click()
+    teams.get_by_role('button', name='Hide live captions').wait_for()
     teams.wait_for_function('Object.keys(window.data).length === 1')
     teams.locator('#meeting').evaluate("""meeting => meeting.insertAdjacentHTML("beforeend", '<div data-tid="closed-caption-chat-message"><span data-tid="author">Morgan</span><span data-tid="closed-caption-text">Teams caption</span></div>')""")
     teams.wait_for_function('Object.values(window.data)[0].entries.length === 1')

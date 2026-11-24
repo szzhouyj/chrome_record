@@ -13,7 +13,7 @@ function controls() {
   const audio = $('mode').value === 'audio';
   $('caption-consent').hidden = audio;
   $('mode').disabled = site === 'teams' || recording || busy;
-  $('mode-hint').textContent = audio ? 'Uses local Whisper. Opens a recorder tab with setup and consent controls.' : 'Turn on live captions in the meeting. The extension saves the text shown on screen.';
+  $('mode-hint').textContent = audio ? 'Uses local Whisper. Opens a recorder tab with setup and consent controls.' : 'The extension tries to turn on live captions and saves the text shown on screen.';
   $('start').textContent = audio ? 'Open audio recorder' : 'Start transcript';
   $('start').disabled = !tab || recording || busy || (!audio && !$('consent').checked);
   $('stop').disabled = !recording || busy; $('live').disabled = !tab || busy;

@@ -75,9 +75,9 @@ The recording indicator is local to your browser. The extension does **not** sen
 
 ## Captions mode
 
-In Google Meet, turn on **Captions (CC)**. In Microsoft Teams in Chrome, open **More actions → Language and speech → Show live captions** and keep captions in the meeting tab.
+When you start saving, the extension tries to enable live captions. If prompted to enable them manually, use **Captions (CC)** in Google Meet or **More actions → Captions** in Microsoft Teams. Some Teams layouts show **More actions → Language and speech → Show live captions**. Keep captions in the meeting tab.
 
-When the extension detects that you’ve joined, it asks whether to save live captions. After informing participants and getting their consent, choose **Start saving captions**. Choose **Not now** to dismiss the prompt for that meeting. You can also start from the extension popup by choosing **Live captions · no model needed** and checking the consent box.
+When the extension detects that you’ve joined, it asks whether to save live captions. After informing participants and getting their consent, choose **Start saving captions**. Choose **Not now** to dismiss the prompt for that meeting. You can also start from the extension popup by choosing **Live captions** and checking the consent box.
 
 Captions mode saves displayed text and speaker names when available. It uses no Python service or microphone. Teams web support uses the meeting page’s caption markup, which can change, and has been tested with browser fixtures.
 

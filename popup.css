@@ -1,4 +1,93 @@
-:root { color-scheme: light; font: 14px/1.5 system-ui, sans-serif; color: #18372e; background: #f6f7f2; }
-[hidden] { display: none !important; }
-select { display: block; width: 100%; margin-top: 6px; padding: 9px; border: 1px solid #c9d5c9; border-radius: 7px; color: #18372e; background: white; font: inherit; }
-body { margin: 0; width: 380px; } header { background: #173c30; color: #f9f9ef; padding: 26px; } .eyebrow { font-size: 10px; letter-spacing: 2px; color: #a9c9b6; } h1 { margin: 8px 0; font-size: 26px; letter-spacing: -1px; } h1 span { color: #c5e789; margin-left: 8px; font-size: 16px; } header p { margin: 10px 0 0; color: #c5d8ca; } main { padding: 22px; } #status { font-weight: 650; } .hint { color: #63736b; font-size: 12px; } .consent { display: flex; align-items: flex-start; gap: 8px; padding: 14px 0; font-size: 12px; } input { accent-color: #225e45; } .controls { display: flex; gap: 8px; } button { border: 1px solid #c9d5c9; background: white; color: #214b36; border-radius: 7px; padding: 9px 12px; font: inherit; cursor: pointer; } #start { flex: 1; background: #225e45; color: white; border-color: #225e45; } button:disabled { opacity: .45; cursor: default; } button:focus-visible, input:focus-visible { outline: 3px solid #9fbf6b; outline-offset: 2px; } h2 { margin: 26px 0 8px; font-size: 15px; } article { border-top: 1px solid #d9e0d6; padding: 13px 0; } article strong { display: block; overflow-wrap: anywhere; } article small { color: #63736b; } article div { display: flex; gap: 6px; margin-top: 8px; } article button { font-size: 12px; padding: 5px 9px; } #error { color: #a12c23; font-size: 12px; } #sessions { max-height: 290px; overflow-y: auto; }
+/* Hallmark 2.0 | Meet Transcript | Compact utility | Warm paper and forest green */
+/* Critique: The popup gives the meeting state and capture controls priority over saved transcripts. */
+:root {
+  color-scheme: light;
+  --font-ui: system-ui, sans-serif;
+  --font-title: Georgia, serif;
+  --paper: #f7f6ef;
+  --surface: #fffefa;
+  --ink: #192e26;
+  --muted: #50635a;
+  --forest: #193e30;
+  --forest-hover: #285641;
+  --on-forest: #fffefa;
+  --wash: #e7eee2;
+  --line: #c6cfc2;
+  --focus: #416e54;
+  --focus-inverse: #d9f1a8;
+  --inactive: #e9ebe4;
+  --inactive-ink: #536158;
+  --danger: #9b302b;
+  --radius: 6px;
+  font: 14px/1.5 var(--font-ui);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+[hidden], #error:empty { display: none; }
+body { width: 380px; max-width: 100%; margin: 0; }
+header { padding: 16px 20px; background: var(--forest); color: var(--on-forest); }
+h1 { margin: 0; font: 400 28px/1.12 var(--font-title); }
+h1, h2 { min-width: 0; overflow-wrap: break-word; }
+main { padding: 16px 20px 20px; }
+h2 { margin: 0 0 4px; font-size: 15px; }
+
+#status {
+  margin: 0 0 16px;
+  padding: 8px 11px;
+  border-inline-start: 3px solid var(--focus);
+  background: var(--wash);
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+label { font-weight: 600; }
+select, button, #token { font: inherit; }
+select, #token {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.hint { margin: 6px 0 12px; color: var(--muted); font-size: 12px; }
+.consent { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; font-size: 13px; font-weight: 400; }
+input[type="checkbox"] { flex: none; margin: 3px 0 0; accent-color: var(--forest); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+button {
+  min-height: 36px;
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--forest);
+  cursor: pointer;
+}
+
+button:enabled:hover { background: var(--wash); }
+#start { flex: 1; background: var(--forest); color: var(--on-forest); border-color: var(--forest); }
+#start:enabled:hover { background: var(--forest-hover); border-color: var(--forest-hover); }
+button:disabled, #start:disabled, select:disabled {
+  background: var(--inactive);
+  color: var(--inactive-ink);
+  border-color: var(--line);
+  cursor: default;
+}
+
+:where(button, input, select, a):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+header :focus-visible { outline-color: var(--focus-inverse); }
+.export-row { margin: 10px 0 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+#sessions { max-height: 270px; overflow-y: auto; }
+article { border-top: 1px solid var(--line); padding: 10px 0 12px; }
+article strong { display: block; overflow-wrap: anywhere; }
+article small { color: var(--muted); }
+article div { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+article button { min-height: 32px; padding: 4px 8px; font-size: 12px; }
+#error { color: var(--danger); font-size: 13px; }

@@ -63,7 +63,7 @@
     Object.assign(panel.style, { position: 'fixed', top: '16px', right: '16px', zIndex: '2147483647', background: '#172c27', color: 'white', padding: '14px', border: '2px solid #73e5b5', borderRadius: '12px', font: '14px system-ui', maxWidth: '350px', boxShadow: '0 4px 24px #0006' });
     const label = document.createElement('span');
     label.setAttribute('role', 'status');
-    label.textContent = `Transcribing · turn on live captions in ${platformName}.`;
+    label.textContent = 'Checking live captions…';
     const button = document.createElement('button');
     button.textContent = 'Stop';
     Object.assign(button.style, { marginLeft: '12px', padding: '6px 12px', cursor: 'pointer' });
@@ -86,6 +86,19 @@
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     capture();
+    if (!collector.entries.length) {
+      const active = () => session === current && !current.endedAt && !collector.entries.length &&
+        MeetCaptions.joined(document, site);
+      if (active()) {
+        void MeetCaptions.enable(document, site, active).then(enabled => {
+          if (active()) indicator(enabled
+            ? 'Saving live captions. Waiting for speech…'
+            : `Turn on live captions in ${platformName} to start receiving text.`);
+        });
+      } else {
+        indicator(`Turn on live captions in ${platformName} to start receiving text.`);
+      }
+    }
     return status();
   }
   chrome.runtime.onMessage.addListener((message, sender, respond) => {
@@ -122,7 +135,7 @@
     const question = document.createElement('p');
     question.textContent = `Save live captions from this ${platformName} meeting?`;
     const hint = document.createElement('p');
-    hint.textContent = 'Turn on live captions in the meeting. Start only after informing everyone and getting their consent.';
+    hint.textContent = 'The extension will try to turn on captions. Start only after informing everyone and getting their consent.';
     const accept = document.createElement('button');
     accept.textContent = 'Start saving captions';
     accept.onclick = () => {
