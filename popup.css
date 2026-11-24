@@ -1,22 +1,21 @@
-/* Hallmark 2.0 | Meet Transcript | Compact utility | Warm paper and forest green */
+/* Hallmark 2.0 | Meet Transcript | Compact utility | Light surfaces and blue actions */
 /* Critique: The popup gives the meeting state and capture controls priority over saved transcripts. */
 :root {
   color-scheme: light;
   --font-ui: system-ui, sans-serif;
-  --font-title: Georgia, serif;
-  --paper: #f7f6ef;
-  --surface: #fffefa;
-  --ink: #192e26;
-  --muted: #50635a;
-  --forest: #193e30;
-  --forest-hover: #285641;
-  --on-forest: #fffefa;
-  --wash: #e7eee2;
-  --line: #c6cfc2;
-  --focus: #416e54;
-  --focus-inverse: #d9f1a8;
-  --inactive: #e9ebe4;
-  --inactive-ink: #536158;
+  --font-title: system-ui, sans-serif;
+  --paper: #f7f9fc;
+  --surface: #ffffff;
+  --ink: #202b37;
+  --muted: #48566a;
+  --forest: #204a78;
+  --forest-hover: #183b62;
+  --on-forest: #ffffff;
+  --wash: #e9f0fa;
+  --line: #ccd6e3;
+  --focus: #245a95;
+  --inactive: #edf0f5;
+  --inactive-ink: #526074;
   --danger: #9b302b;
   --radius: 6px;
   font: 14px/1.5 var(--font-ui);
@@ -28,8 +27,8 @@
 html, body { overflow-x: clip; }
 [hidden], #error:empty { display: none; }
 body { width: 380px; max-width: 100%; margin: 0; }
-header { padding: 16px 20px; background: var(--forest); color: var(--on-forest); }
-h1 { margin: 0; font: 400 28px/1.12 var(--font-title); }
+header { padding: 16px 20px; background: var(--surface); border-bottom: 1px solid var(--line); }
+h1 { margin: 0; font: 650 20px/1.25 var(--font-title); }
 h1, h2 { min-width: 0; overflow-wrap: break-word; }
 main { padding: 16px 20px 20px; }
 h2 { margin: 0 0 4px; font-size: 15px; }
@@ -37,7 +36,7 @@ h2 { margin: 0 0 4px; font-size: 15px; }
 #status {
   margin: 0 0 16px;
   padding: 8px 11px;
-  border-inline-start: 3px solid var(--focus);
+  border-radius: var(--radius);
   background: var(--wash);
   font-weight: 650;
   overflow-wrap: anywhere;
@@ -57,6 +56,7 @@ select, #token {
 }
 
 .hint { margin: 6px 0 12px; color: var(--muted); font-size: 12px; }
+.reminder { margin: 10px 0; color: var(--muted); font-size: 13px; }
 .consent { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; font-size: 13px; font-weight: 400; }
 input[type="checkbox"] { flex: none; margin: 3px 0 0; accent-color: var(--forest); }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -82,7 +82,6 @@ button:disabled, #start:disabled, select:disabled {
 }
 
 :where(button, input, select, a):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-header :focus-visible { outline-color: var(--focus-inverse); }
 .export-row { margin: 10px 0 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 #sessions { max-height: 270px; overflow-y: auto; }
 article { border-top: 1px solid var(--line); padding: 10px 0 12px; }

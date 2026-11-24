@@ -11,11 +11,10 @@ async function send(type, extra = {}, mode = $('mode').value) {
 }
 function controls() {
   const audio = $('mode').value === 'audio';
-  $('caption-consent').hidden = audio;
   $('mode').disabled = site === 'teams' || recording || busy;
-  $('mode-hint').textContent = audio ? 'Uses local Whisper. Opens a recorder tab with setup and consent controls.' : 'The extension tries to turn on live captions and saves the text shown on screen.';
+  $('mode-hint').textContent = audio ? 'Transcribe tab audio with local Whisper.' : 'The extension tries to turn on live captions and saves the text shown on screen.';
   $('start').textContent = audio ? 'Open audio recorder' : 'Start transcript';
-  $('start').disabled = !tab || recording || busy || (!audio && !$('consent').checked);
+  $('start').disabled = !tab || recording || busy;
   $('stop').disabled = !recording || busy; $('live').disabled = !tab || busy;
 }
 async function render() {
@@ -62,7 +61,7 @@ $('start').onclick = async () => {
     } else {
       const audio = await send('STATUS', {}, 'audio').catch(() => null);
       if (audio?.recording) throw new Error('Stop audio transcription before starting captions.');
-      await send('START', { consent: $('consent').checked }, 'captions');
+      await send('START', {}, 'captions');
     }
     await refresh();
   } catch (error) { $('error').textContent = error.message; }
@@ -74,7 +73,6 @@ $('stop').onclick = async () => {
   catch (error) { $('error').textContent = error.message; }
   finally { busy = false; controls(); }
 };
-$('consent').onchange = controls;
 $('mode').onchange = () => { controls(); };
 $('live').onclick = async () => {
   try { const session = await send('LIVE'); if (session) MeetAudio.download(session); else $('error').textContent = 'No transcript in this tab yet.'; }

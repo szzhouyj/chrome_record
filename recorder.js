@@ -6,9 +6,9 @@ let audioContext, worklet, tabStream, micStream, queue = [], processing = null, 
 let offsetSeconds = 0, flushResolve, lastSave = Promise.resolve();
 function controls() {
   const busy = starting || !!processing || ['starting', 'recording', 'stopping'].includes(state);
-  $('start').disabled = !meeting || busy || !$('consent').checked || !$('token').value.trim();
+  $('start').disabled = !meeting || busy || !$('token').value.trim();
   $('stop').disabled = state !== 'recording';
-  for (const id of ['token', 'microphone', 'consent']) $(id).disabled = busy;
+  for (const id of ['token', 'microphone']) $(id).disabled = busy;
   $('txt').disabled = $('json').disabled = !session;
 }
 async function indicator(text) {
@@ -72,7 +72,6 @@ async function drain() {
 }
 async function start() {
   if (starting || processing || ['recording', 'stopping'].includes(state)) return;
-  if (!$('consent').checked) throw new Error('Confirm participant consent before recording.');
   if (!$('token').value.trim()) throw new Error('Paste the local service access token.');
   starting = true; state = 'starting'; session = null; controls(); $('error').textContent = ''; $('transcript').replaceChildren();
   show('Starting audio capture · connecting to local Whisper…');
@@ -136,7 +135,7 @@ function stop() {
 }
 $('start').onclick = () => { void start().catch(fail); };
 $('stop').onclick = () => { void stop().catch(fail); };
-for (const id of ['consent', 'token']) $(id).oninput = controls;
+$('token').oninput = controls;
 for (const format of ['txt', 'json']) $(format).onclick = () => MeetAudio.download(session, format);
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (message.target !== 'audio-recorder' || message.tabId !== targetTabId) return;

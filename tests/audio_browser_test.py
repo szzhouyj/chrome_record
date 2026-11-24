@@ -71,8 +71,8 @@ with sync_playwright() as p:
         page.wait_for_function("document.querySelector('#meeting').textContent === 'Audio test meeting'")
         assert page.locator('#start').is_disabled()
         page.locator('#token').fill('test-token')
-        assert page.locator('#start').is_disabled()
-        page.locator('#consent').check()
+        assert page.get_by_role('checkbox').count() == 1
+        assert 'let everyone know' in page.locator('.reminder').text_content()
         assert page.locator('#start').is_enabled()
         return page, errors
 
@@ -146,4 +146,4 @@ with sync_playwright() as p:
     assert errors == [], errors
     browser.close()
     server.shutdown(); server.server_close()
-    print('PASS: consent/token gates, real PCM worklet, 10s WAV windows, mic mix, final flush, timestamps, export, service failure, storage recovery, and navigation stop')
+    print('PASS: token gate, real PCM worklet, 10s WAV windows, mic mix, final flush, timestamps, export, service failure, storage recovery, and navigation stop')

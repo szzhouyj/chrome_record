@@ -46,9 +46,8 @@
     catch (error) { indicator('Could not save. Keep this tab open and export the live transcript.'); throw error; }
     return status();
   }
-  async function start(consent) {
+  async function start() {
     if (status().recording) return status();
-    if (!consent) throw new Error('Confirm participant consent before starting.');
     if (!MeetCaptions.platform(location.href) || (site === 'teams' && !MeetCaptions.joined(document, site))) {
       throw new Error('Join a meeting in your browser first.');
     }
@@ -119,7 +118,7 @@
     }
     const actions = {
       STATUS: () => status(),
-      START: () => start(message.consent === true),
+      START: () => start(),
       STOP: () => stop(),
       LIVE: () => session ? { ...session, entries: collector.entries } : null
     };
@@ -131,16 +130,23 @@
     prompt = document.createElement('aside');
     prompt.id = 'meet-transcript-prompt';
     prompt.setAttribute('aria-label', 'Save meeting captions');
-    Object.assign(prompt.style, { position: 'fixed', top: '70px', right: '16px', zIndex: '2147483647', background: '#172c27', color: 'white', padding: '14px', borderRadius: '12px', font: '14px system-ui', maxWidth: '320px' });
+    Object.assign(prompt.style, {
+      position: 'fixed', bottom: '88px', right: '16px', zIndex: '2147483647',
+      boxSizing: 'border-box', width: 'min(320px, calc(100% - 32px))', padding: '16px',
+      background: '#ffffff', color: '#202b37', border: '1px solid #d9dfe7',
+      borderRadius: '12px', boxShadow: '0 8px 28px #17283d26', font: '14px/1.5 system-ui, sans-serif'
+    });
     const question = document.createElement('p');
-    question.textContent = `Save live captions from this ${platformName} meeting?`;
+    question.textContent = 'Save live captions?';
+    Object.assign(question.style, { margin: '0', fontWeight: '650', fontSize: '16px' });
     const hint = document.createElement('p');
-    hint.textContent = 'The extension will try to turn on captions. Start only after informing everyone and getting their consent.';
+    hint.textContent = 'Please let everyone know before you start transcribing.';
+    Object.assign(hint.style, { margin: '5px 0 14px', color: '#48566a' });
     const accept = document.createElement('button');
     accept.textContent = 'Start saving captions';
     accept.onclick = () => {
       accept.disabled = true;
-      void start(true).catch(error => {
+      void start().catch(error => {
         if (prompt?.isConnected) {
           hint.textContent = error.message;
           accept.disabled = false;
@@ -150,7 +156,19 @@
     const dismiss = document.createElement('button');
     dismiss.textContent = 'Not now';
     dismiss.onclick = () => prompt.remove();
-    prompt.append(question, hint, accept, dismiss);
+    const actions = document.createElement('div');
+    Object.assign(actions.style, { display: 'flex', flexWrap: 'wrap', gap: '8px' });
+    for (const button of [accept, dismiss]) {
+      button.type = 'button';
+      Object.assign(button.style, {
+        padding: '7px 11px', border: '1px solid #ccd6e3', borderRadius: '7px',
+        background: '#ffffff', color: '#23374d', font: '600 13px/1.5 system-ui, sans-serif',
+        cursor: 'pointer'
+      });
+    }
+    Object.assign(accept.style, { background: '#204a78', borderColor: '#204a78', color: '#ffffff' });
+    actions.append(accept, dismiss);
+    prompt.append(question, hint, actions);
     document.documentElement.append(prompt);
   }
   function checkMeeting() {

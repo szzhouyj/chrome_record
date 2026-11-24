@@ -65,7 +65,7 @@ The service binds to loopback only, requires a bearer token, and rejects non-ext
 1. Join Meet at a regular `abc-defg-hij` meeting URL and inform participants / obtain consent.
 2. Open the extension, select **Tab audio · captions off**, and click **Open audio recorder**.
 3. Paste the token from the local service. Optionally enable **Include my microphone** to capture your own voice. Grant microphone access when Chrome asks.
-4. Check the consent box and click **Start audio transcription**. If Chrome requests local-network access, allow access to the local service.
+4. Click **Start audio transcription**. If Chrome requests local-network access, allow access to the local service.
 5. Keep the recorder tab open; return to Meet while it works. First text appears after a 10-second window plus model processing time.
 6. Click **Stop and finish** in the recorder (or Stop in Meet / the popup). Wait for processing to finish, then export TXT or JSON. Text is also saved in the extension's popup.
 
@@ -77,7 +77,7 @@ The recording indicator is local to your browser. The extension does **not** sen
 
 When you start saving, the extension tries to enable live captions. If prompted to enable them manually, use **Captions (CC)** in Google Meet or **More actions → Captions** in Microsoft Teams. Some Teams layouts show **More actions → Language and speech → Show live captions**. Keep captions in the meeting tab.
 
-When the extension detects that you’ve joined, it asks whether to save live captions. After informing participants and getting their consent, choose **Start saving captions**. Choose **Not now** to dismiss the prompt for that meeting. You can also start from the extension popup by choosing **Live captions** and checking the consent box.
+When the extension detects that you’ve joined, it asks whether to save live captions. After informing participants and getting their consent, choose **Start saving captions**. Choose **Not now** to dismiss the prompt for that meeting. You can also start from the extension popup by choosing **Live captions** and clicking **Start transcript**.
 
 Captions mode saves displayed text and speaker names when available. It uses no Python service or microphone. Teams web support uses the meeting page’s caption markup, which can change, and has been tested with browser fixtures.
 

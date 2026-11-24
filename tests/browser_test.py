@@ -34,8 +34,7 @@ with sync_playwright() as p:
             window.captionClicks = (window.captionClicks || 0) + 1;
         };
     }""")
-    assert 'consent' in page.evaluate("send({type:'START'})")['error']
-    assert page.evaluate("send({type:'START',consent:true})")['result']['recording']
+    assert page.evaluate("send({type:'START'})")['result']['recording']
     page.wait_for_function("window.captionClicks === 1")
     page.evaluate("document.querySelector('#captions').innerHTML = '<div class=\"nMcdL\"><div class=\"zs7s8d\">Alex</div><div class=\"ygicle\">Hello</div></div>'")
     page.wait_for_function("document.querySelector('#meet-transcript-indicator').textContent.includes('1 captions')")
@@ -52,7 +51,7 @@ with sync_playwright() as p:
     assert saved['endedAt'] and len(saved['entries']) == 3 and saved['entries'][2]['speaker'] == 'Sam'
     page.evaluate("document.querySelector('.ygicle').textContent = 'After stop'")
     assert len(page.evaluate("send({type:'LIVE'})")['result']['entries']) == 3
-    assert page.evaluate("send({type:'START',consent:true})")['result']['recording']
+    assert page.evaluate("send({type:'START'})")['result']['recording']
     page.wait_for_timeout(850)
     assert len(page.evaluate('Object.keys(window.data)')) == 2
     assert page.evaluate('window.captionClicks') == 1
@@ -76,7 +75,7 @@ with sync_playwright() as p:
     teams.evaluate(MOCK)
     for script in ['captions.js', 'content.js']:
         teams.add_script_tag(path=str(ROOT / script))
-    assert 'Join a meeting' in teams.evaluate("send({type:'START', consent:true})")['error']
+    assert 'Join a meeting' in teams.evaluate("send({type:'START'})")['error']
     assert teams.locator('#meet-transcript-prompt').count() == 0
 
     teams.evaluate("""document.querySelector("#meeting").innerHTML = '<button data-tid="hangup-button">Leave</button>'""")
@@ -116,7 +115,7 @@ with sync_playwright() as p:
     assert saved_teams['entries'][0]['speaker'] == 'Morgan'
     assert saved_teams['entries'][0]['text'] == 'Teams caption'
 
-    # Popup renders stored content as text, and gates Start on the checkbox.
+    # Popup renders stored content as text and starts captions without a checkbox.
     popup = browser.new_page(viewport={'width': 420, 'height': 820})
     popup.route('http://extension.test/**', lambda route: route.fulfill(path=str(ROOT / (route.request.url.split('/')[-1] or 'popup.html'))))
     popup.add_init_script(MOCK)
@@ -124,8 +123,8 @@ with sync_playwright() as p:
     popup.wait_for_function("document.querySelector('#status').textContent === 'Ready when you are'")
     assert popup.locator('#start').text_content() == 'Open audio recorder'
     popup.locator('#mode').select_option('captions')
-    assert popup.locator('#start').is_disabled()
-    popup.locator('#consent').check()
+    assert popup.get_by_role('checkbox').count() == 0
+    assert 'let everyone know' in popup.locator('.reminder').text_content()
     assert popup.locator('#start').is_enabled()
     popup.evaluate('(session) => window.data = {"transcript:test": session}', {**saved, 'title': '<img src=x onerror=bad()>'})
     popup.evaluate('render()')
@@ -142,4 +141,4 @@ with sync_playwright() as p:
     assert set(manifest['permissions']) == {'storage', 'activeTab', 'tabCapture'}
     assert manifest['host_permissions'] == ['http://127.0.0.1:8765/*']
     browser.close()
-    print('PASS: consent, caption updates, speaker changes, stop, persistence, restart, storage failure, recovery, popup, export, and manifest checks')
+    print('PASS: caption updates, speaker changes, stop, persistence, restart, storage failure, recovery, popup, export, and manifest checks')
