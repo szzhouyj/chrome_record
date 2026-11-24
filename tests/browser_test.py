@@ -59,6 +59,40 @@ with sync_playwright() as p:
         page.add_script_tag(path=str(ROOT / script))
     assert not page.evaluate("send({type:'STATUS'})")['result']['recording']
     assert page.locator('#meet-transcript-indicator').count() == 0
+    # A Teams lobby does not trigger the prompt or allow capture.
+    teams = browser.new_page()
+    teams.route('https://teams.cloud.microsoft/**', lambda route: route.fulfill(
+        body='<html><body><div id="meeting"></div></body></html>', content_type='text/html'))
+    teams.goto('https://teams.cloud.microsoft/v2/')
+    teams.evaluate(MOCK)
+    for script in ['captions.js', 'content.js']:
+        teams.add_script_tag(path=str(ROOT / script))
+    assert 'Join a meeting' in teams.evaluate("send({type:'START', consent:true})")['error']
+    assert teams.locator('#meet-transcript-prompt').count() == 0
+
+    teams.evaluate("""document.querySelector("#meeting").innerHTML = '<button data-tid="hangup-button">Leave</button>'""")
+    teams.get_by_role('button', name='Not now').click()
+    teams.wait_for_timeout(600)
+    assert teams.locator('#meet-transcript-prompt').count() == 0
+    assert teams.evaluate('Object.keys(window.data).length') == 0
+
+    teams.locator('[data-tid="hangup-button"]').evaluate('button => button.remove()')
+    teams.wait_for_function("""() => {
+        void send({type:'STATUS'}).then(reply => { window.leftTeams = !reply.result.joined; });
+        return window.leftTeams === true;
+    }""")
+    teams.evaluate("""document.querySelector("#meeting").innerHTML = '<button data-tid="hangup-button">Leave</button>'""")
+    teams.get_by_role('button', name='Start saving captions').click()
+    teams.wait_for_function('Object.keys(window.data).length === 1')
+    teams.locator('#meeting').evaluate("""meeting => meeting.insertAdjacentHTML("beforeend", '<div data-tid="closed-caption-chat-message"><span data-tid="author">Morgan</span><span data-tid="closed-caption-text">Teams caption</span></div>')""")
+    teams.wait_for_function('Object.values(window.data)[0].entries.length === 1')
+    teams.locator('[data-tid="hangup-button"]').evaluate('button => button.remove()')
+    teams.wait_for_function('Object.values(window.data)[0].endedAt')
+    saved_teams = teams.evaluate('Object.values(window.data)[0]')
+    assert saved_teams['platform'] == 'teams'
+    assert saved_teams['entries'][0]['speaker'] == 'Morgan'
+    assert saved_teams['entries'][0]['text'] == 'Teams caption'
+
     # Popup renders stored content as text, and gates Start on the checkbox.
     popup = browser.new_page(viewport={'width': 420, 'height': 820})
     popup.route('http://extension.test/**', lambda route: route.fulfill(path=str(ROOT / (route.request.url.split('/')[-1] or 'popup.html'))))

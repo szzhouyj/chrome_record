@@ -3,12 +3,12 @@
   "name": "Meet Transcript",
   "version": "0.3.0",
   "minimum_chrome_version": "116",
-  "description": "Transcribe Google Meet tab audio with local Whisper, or save live captions.",
+  "description": "Save Google Meet and Teams web captions, or transcribe Google Meet audio with local Whisper.",
   "permissions": ["storage", "activeTab", "tabCapture"],
   "host_permissions": ["http://127.0.0.1:8765/*"],
   "action": { "default_popup": "popup.html", "default_title": "Meet Transcript" },
   "content_scripts": [{
-    "matches": ["https://meet.google.com/*"],
+    "matches": ["https://meet.google.com/*", "https://teams.microsoft.com/*", "https://teams.cloud.microsoft/*", "https://teams.live.com/*"],
     "js": ["captions.js", "content.js"],
     "run_at": "document_idle"
   }]

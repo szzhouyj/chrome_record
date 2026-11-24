@@ -5,7 +5,7 @@ Chrome Manifest V3 extension with two modes:
 | Mode | Captions required? | Model / service | Captures |
 | --- | --- | --- | --- |
 | Tab audio | No | Local MLX Whisper on Apple Silicon, faster-whisper on CPU | Sound played by Meet; optionally your microphone |
-| Meet captions | Yes | Google's built-in captions | Caption text and speaker names when available |
+| Live captions | Yes | Google Meet or Microsoft Teams web captions | Caption text and speaker names when available |
 
 No cloud transcription API or API key. Audio mode requires running the included Python service on the **same computer as Chrome**. On Apple Silicon, the service defaults to **MLX + large-v3-turbo on the Apple GPU**. Other computers default to Whisper **small** on CPU using int8. The first launch downloads model files; subsequent launches use the local cache. Meeting audio is sent only to `http://127.0.0.1:8765` for local processing. Raw audio is not saved by the extension or service.
 
@@ -75,7 +75,11 @@ The recording indicator is local to your browser. The extension does **not** sen
 
 ## Captions mode
 
-Turn on Meet's **Captions (CC)**, choose **Meet captions · no model needed**, check the consent box and start. No Python service or microphone access is used in this mode. It captures only displayed captions, beginning when you start. Speaker names fall back to “Unknown speaker” if unavailable.
+In Google Meet, turn on **Captions (CC)**. In Microsoft Teams in Chrome, open **More actions → Language and speech → Show live captions** and keep captions in the meeting tab.
+
+When the extension detects that you’ve joined, it asks whether to save live captions. After informing participants and getting their consent, choose **Start saving captions**. Choose **Not now** to dismiss the prompt for that meeting. You can also start from the extension popup by choosing **Live captions · no model needed** and checking the consent box.
+
+Captions mode saves displayed text and speaker names when available. It uses no Python service or microphone. Teams web support uses the meeting page’s caption markup, which can change, and has been tested with browser fixtures.
 
 ## Storage, failures, and recovery
 

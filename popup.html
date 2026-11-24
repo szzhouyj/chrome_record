@@ -4,9 +4,9 @@
 <body>
   <header><span class="eyebrow">YOUR MEETING NOTEBOOK</span><h1>Meet Transcript<span>●</span></h1><p>Stay in the conversation.<br>Keep the words that matter.</p></header>
   <main>
-    <div id="status" role="status">Connecting to Meet…</div>
+    <div id="status" role="status">Checking meeting tab…</div>
     <label for="mode">Transcription source</label>
-    <select id="mode"><option value="audio">Tab audio · captions off</option><option value="captions">Meet captions · no model needed</option></select>
+    <select id="mode"><option value="audio">Tab audio · captions off</option><option value="captions">Live captions · no model needed</option></select>
     <p class="hint" id="mode-hint">Uses local Whisper. Opens a recorder tab with setup and consent controls.</p>
     <label class="consent" id="caption-consent" hidden><input id="consent" type="checkbox"> I’ve informed participants and have their consent to transcribe.</label>
     <div class="controls"><button id="start" disabled>Start transcript</button><button id="stop" disabled>Stop</button></div>
@@ -16,5 +16,5 @@
     <div id="sessions"></div>
     <p id="error" role="alert"></p>
   </main>
-  <script src="audio-tools.js"></script><script src="popup.js"></script>
+  <script src="audio-tools.js"></script><script src="captions.js"></script><script src="popup.js"></script>
 </body></html>

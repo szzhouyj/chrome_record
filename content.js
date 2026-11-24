@@ -1,9 +1,12 @@
 (() => {
+  const site = location.hostname === 'meet.google.com' ? 'meet' : 'teams';
+  const platformName = site === 'teams' ? 'Microsoft Teams' : 'Google Meet';
+  let inCall = false, prompt;
   let session = null, collector, observer, timer, panel, saving = Promise.resolve();
   let dirty = false;
   const key = () => `transcript:${session.id}`;
   function status() {
-    return { recording: !!session && !session.endedAt, count: collector?.entries.length || 0 };
+    return { recording: !!session && !session.endedAt, count: collector?.entries.length || 0, joined: inCall };
   }
   function indicator(message) {
     panel.querySelector('span').textContent = message;
@@ -20,8 +23,8 @@
   }
   function capture() {
     let changed = false;
-    for (const row of MeetCaptions.rows(document)) {
-      changed = collector.ingest(row, MeetCaptions.read(row)) || changed;
+    for (const row of MeetCaptions.rows(document, site)) {
+      changed = collector.ingest(row, MeetCaptions.read(row, site)) || changed;
     }
     if (changed) {
       dirty = true;
@@ -34,7 +37,7 @@
   }
   async function stop(message = 'Transcript saved. You can export it from the extension.') {
     if (!status().recording) return status();
-    observer.disconnect();
+    observer?.disconnect();
     capture();
     session.endedAt = new Date().toISOString();
     dirty = true;
@@ -46,16 +49,21 @@
   async function start(consent) {
     if (status().recording) return status();
     if (!consent) throw new Error('Confirm participant consent before starting.');
-    if (!/^\/[a-z]{3}-[a-z]{4}-[a-z]{3}\/?$/.test(location.pathname)) throw new Error('Open a Google Meet meeting first.');
+    if (!MeetCaptions.platform(location.href) || (site === 'teams' && !MeetCaptions.joined(document, site))) {
+      throw new Error('Join a meeting in your browser first.');
+    }
+    if (site === 'meet' && document.getElementById('meet-audio-indicator')?.dataset.active === 'true') {
+      throw new Error('Stop audio transcription before starting captions.');
+    }
     panel?.remove();
     collector = new MeetCaptions.Collector();
-    session = { id: crypto.randomUUID(), title: document.title, url: location.href.split('?')[0], startedAt: new Date().toISOString(), endedAt: null };
+    const current = session = { platform: site, id: crypto.randomUUID(), title: document.title, url: location.origin + location.pathname, startedAt: new Date().toISOString(), endedAt: null };
     panel = document.createElement('div');
     panel.id = 'meet-transcript-indicator';
     Object.assign(panel.style, { position: 'fixed', top: '16px', right: '16px', zIndex: '2147483647', background: '#172c27', color: 'white', padding: '14px', border: '2px solid #73e5b5', borderRadius: '12px', font: '14px system-ui', maxWidth: '350px', boxShadow: '0 4px 24px #0006' });
     const label = document.createElement('span');
     label.setAttribute('role', 'status');
-    label.textContent = 'Transcribing · turn on Meet captions (CC). Inform all participants.';
+    label.textContent = `Transcribing · turn on live captions in ${platformName}.`;
     const button = document.createElement('button');
     button.textContent = 'Stop';
     Object.assign(button.style, { marginLeft: '12px', padding: '6px 12px', cursor: 'pointer' });
@@ -63,7 +71,16 @@
     panel.append(label, button);
     document.documentElement.append(panel);
     dirty = true;
-    try { await save(); } catch (error) { session.endedAt = new Date().toISOString(); indicator('Storage unavailable. Transcription did not start.'); throw error; }
+    try { await save(); } catch (error) {
+      current.endedAt = new Date().toISOString();
+      if (session === current) {
+        panel.querySelector('button').disabled = true;
+        indicator('Storage unavailable. Transcription did not start.');
+      }
+      throw error;
+    }
+    if (session !== current || current.endedAt) return status();
+    prompt?.remove();
     observer = new MutationObserver(records => {
       if (records.some(record => !panel.contains(record.target))) capture();
     });
@@ -82,6 +99,7 @@
         button.onclick = () => chrome.runtime.sendMessage({ target: 'audio-recorder', type: 'STOP', tabId: message.tabId }).catch(() => {});
         audioPanel.append(label, button); document.documentElement.append(audioPanel);
       }
+      audioPanel.dataset.active = String(message.recording === true);
       audioPanel.querySelector('span').textContent = String(message.text);
       audioPanel.querySelector('button').disabled = !message.recording;
       respond({ result: true }); return;
@@ -96,10 +114,50 @@
     Promise.resolve().then(actions[message.type]).then(result => respond({ result }), error => respond({ error: error.message }));
     return true;
   });
+  function showPrompt() {
+    prompt = document.createElement('aside');
+    prompt.id = 'meet-transcript-prompt';
+    prompt.setAttribute('aria-label', 'Save meeting captions');
+    Object.assign(prompt.style, { position: 'fixed', top: '70px', right: '16px', zIndex: '2147483647', background: '#172c27', color: 'white', padding: '14px', borderRadius: '12px', font: '14px system-ui', maxWidth: '320px' });
+    const question = document.createElement('p');
+    question.textContent = `Save live captions from this ${platformName} meeting?`;
+    const hint = document.createElement('p');
+    hint.textContent = 'Turn on live captions in the meeting. Start only after informing everyone and getting their consent.';
+    const accept = document.createElement('button');
+    accept.textContent = 'Start saving captions';
+    accept.onclick = () => {
+      accept.disabled = true;
+      void start(true).catch(error => {
+        if (prompt?.isConnected) {
+          hint.textContent = error.message;
+          accept.disabled = false;
+        }
+      });
+    };
+    const dismiss = document.createElement('button');
+    dismiss.textContent = 'Not now';
+    dismiss.onclick = () => prompt.remove();
+    prompt.append(question, hint, accept, dismiss);
+    document.documentElement.append(prompt);
+  }
+  function checkMeeting() {
+    const joined = !!MeetCaptions.platform(location.href) && MeetCaptions.joined(document, site);
+    if (joined === inCall) return;
+    inCall = joined;
+    if (joined) {
+      if (!status().recording && document.getElementById('meet-audio-indicator')?.dataset.active !== 'true') showPrompt();
+    } else {
+      prompt?.remove();
+      if (status().recording) void stop().catch(() => {});
+    }
+  }
+  checkMeeting();
+  const meetingCheck = setInterval(checkMeeting, 500);
   // A reload never silently resumes recording. Each saved snapshot remains recoverable.
   window.addEventListener('pagehide', () => {
+    clearInterval(meetingCheck);
     if (status().recording) {
-      observer.disconnect();
+      observer?.disconnect();
       session.endedAt = new Date().toISOString(); dirty = true;
       void save().catch(() => {});
     }

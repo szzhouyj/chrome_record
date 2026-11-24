@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-let tab, recording = false, activeMode = null, busy = false;
+let tab, site, recording = false, activeMode = null, busy = false;
 async function send(type, extra = {}, mode = $('mode').value) {
   if (!tab?.id) throw new Error('Open a Meet meeting, then reopen this popup.');
   const reply = mode === 'audio'
@@ -12,8 +12,8 @@ async function send(type, extra = {}, mode = $('mode').value) {
 function controls() {
   const audio = $('mode').value === 'audio';
   $('caption-consent').hidden = audio;
-  $('mode').disabled = recording || busy;
-  $('mode-hint').textContent = audio ? 'Uses local Whisper. Opens a recorder tab with setup and consent controls.' : 'Turn on Google Meet captions (CC). Only displayed captions are captured.';
+  $('mode').disabled = site === 'teams' || recording || busy;
+  $('mode-hint').textContent = audio ? 'Uses local Whisper. Opens a recorder tab with setup and consent controls.' : 'Turn on live captions in the meeting. The extension saves the text shown on screen.';
   $('start').textContent = audio ? 'Open audio recorder' : 'Start transcript';
   $('start').disabled = !tab || recording || busy || (!audio && !$('consent').checked);
   $('stop').disabled = !recording || busy; $('live').disabled = !tab || busy;
@@ -45,11 +45,11 @@ async function render() {
   }
 }
 async function refresh() {
-  const [caption, audio] = await Promise.all([send('STATUS', {}, 'captions').catch(() => null), send('STATUS', {}, 'audio').catch(() => null)]);
+  const [caption, audio] = await Promise.all([send('STATUS', {}, 'captions').catch(() => null), site === 'meet' ? send('STATUS', {}, 'audio').catch(() => null) : null]);
   activeMode = audio?.recording ? 'audio' : caption?.recording ? 'captions' : null;
   recording = !!activeMode;
   if (activeMode) $('mode').value = activeMode;
-  $('status').textContent = recording ? `Transcribing ${activeMode === 'audio' ? 'audio' : 'captions'} · ${(activeMode === 'audio' ? audio : caption).count} entries` : !tab ? 'Open a Google Meet meeting' : 'Ready when you are';
+  $('status').textContent = recording ? `Transcribing ${activeMode === 'audio' ? 'audio' : 'captions'} · ${(activeMode === 'audio' ? audio : caption).count} entries` : !tab ? 'Open a Google Meet or Teams meeting' : 'Ready when you are';
   controls(); await render();
 }
 $('start').onclick = async () => {
@@ -83,6 +83,8 @@ $('live').onclick = async () => {
 chrome.storage.onChanged.addListener(() => { void refresh().catch(error => $('error').textContent = error.message); });
 (async () => {
   [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!/^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}(?:[/?#]|$)/.test(tab?.url || '')) tab = null;
+  site = MeetCaptions.platform(tab?.url);
+  if (!site) tab = null;
+  if (site === 'teams') $('mode').value = 'captions';
   await refresh();
 })().catch(error => $('error').textContent = error.message);
